@@ -1,5 +1,5 @@
 import { cdModule } from './cd.js';
-import { runCat, runAdd } from './fs.js';
+import { runCat, runAdd, runRename, runCopy, runMove, runDelete } from './fs.js';
 import { lsModule } from './ls.js';
 import { osModule } from './os.js';
 import { changePath } from './utils/changePath.js';
@@ -26,6 +26,18 @@ export async function runCommand({ command, options }) {
         break;
       case 'add':
         await runAdd(options);
+        break;
+      case 'rn':
+        await runRename(options);
+        break;
+      case 'cp':
+        await runCopy(options);
+        break;
+      case 'mv':
+        await runMove(options);
+        break;
+      case 'rm':
+        await runDelete(options);
         break;
       default:
         console.log('wrong command');
