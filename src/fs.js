@@ -4,7 +4,6 @@ import { rename as fsRename } from 'fs/promises';
 import { makeAbsolutePath, parsePath } from './utils/changePath.js';
 import { createReadStream, createWriteStream } from 'fs';
 import * as path from 'path';
-import { pipeline } from 'stream';
 
 export async function runCat(catPath) {
   let absPath;
@@ -25,13 +24,12 @@ export async function runAdd(fileName) {
   }
   const absPath = path.join(process.cwd(), fileName);
   await writeFile(absPath, '', { flag: 'wx+' });
-  console.log('absPath: ', absPath);
 }
 
 export async function runRename(options) {
   try {
     const args = parsePath(options);
-    const filePath = args.argPath;
+    const filePath = makeAbsolutePath(args.argPath);
     const restArgs = parsePath(args.argRest);
     const fileName = restArgs.argPath;
     try {
@@ -52,16 +50,16 @@ export async function runRename(options) {
 export async function runCopy(options) {
   try {
     const args = parsePath(options);
-    const fromPath = args.argPath;
+    const fromPath = makeAbsolutePath(args.argPath);
     const restArgs = parsePath(args.argRest);
-    const toPath = path.join(restArgs.argPath, path.basename(fromPath));
+    const toPath = path.join(makeAbsolutePath(restArgs.argPath), path.basename(fromPath));
     await access(fromPath);
-    await access(restArgs.argPath);
+    await access(makeAbsolutePath(restArgs.argPath));
     const readStream = createReadStream(fromPath);
     const writeStream = createWriteStream(toPath);
     readStream.pipe(writeStream);
     console.log('file successeful copied');
-  } catch (err) {
+  } catch {
     console.error('operation failed');
   }
 }
@@ -69,9 +67,9 @@ export async function runCopy(options) {
 export async function runMove(options) {
   try {
     const args = parsePath(options);
-    const fromPath = args.argPath;
+    const fromPath = makeAbsolutePath(args.argPath);
     const restArgs = parsePath(args.argRest);
-    const toPath = path.join(restArgs.argPath, path.basename(fromPath));
+    const toPath = path.join(makeAbsolutePath(restArgs.argPath), path.basename(fromPath));
     await access(fromPath);
     await access(restArgs.argPath);
     const readStream = createReadStream(fromPath);
@@ -88,7 +86,7 @@ export async function runMove(options) {
 export async function runDelete(options) {
   try {
     const args = parsePath(options);
-    const deletePath = args.argPath;
+    const deletePath = makeAbsolutePath(args.argPath);
     await access(deletePath);
     await rm(deletePath);
     console.log('file successfully deleted');

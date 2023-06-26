@@ -9,7 +9,6 @@ let currentPath = homedir();
 console.log(`Welcome to the File Manager, ${userNameArgv}!`);
 console.log(`You are currently in ${currentPath}`);
 process.chdir(currentPath);
-// console.log(process.cwd());
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 

@@ -1,5 +1,7 @@
+import { runCompress, runDecompress } from './brotli.js';
 import { cdModule } from './cd.js';
 import { runCat, runAdd, runRename, runCopy, runMove, runDelete } from './fs.js';
+import { runHash } from './hash.js';
 import { lsModule } from './ls.js';
 import { osModule } from './os.js';
 import { changePath } from './utils/changePath.js';
@@ -39,9 +41,17 @@ export async function runCommand({ command, options }) {
       case 'rm':
         await runDelete(options);
         break;
+      case 'hash':
+        await runHash(options);
+        break;
+      case 'compress':
+        await runCompress(options);
+        break;
+      case 'decompress':
+        await runDecompress(options);
+        break;
       default:
         console.log('wrong command');
-      // throw new Error();
     }
   } catch (err) {
     console.log('Catch ERR', err);
