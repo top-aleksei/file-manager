@@ -1,6 +1,6 @@
 import { createHash } from 'crypto';
 import { access, readFile } from 'fs/promises';
-import { parsePath } from './utils/changePath.js';
+import { makeAbsolutePath, parsePath } from './utils/changePath.js';
 
 export async function runHash(options) {
   try {
