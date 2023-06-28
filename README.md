@@ -1,2 +1,2 @@
 # file-manager
-file manager on Node js (RS School task
+file manager on Node js (RS School task)
