@@ -6,7 +6,6 @@ export function changePath(newPath) {
   } catch {
     console.error(`"${newPath}" is not a folder or you have no access`);
   }
-  console.log(`You are currently in ${process.cwd()}`);
 }
 
 export function parsePath(newPath) {
@@ -21,10 +20,10 @@ export function parsePath(newPath) {
       throw new Error('Invalid path');
     }
   } else {
-    // return newPath.split(' ')[0];
+    const [argPath, ...argRest] = newPath.split(' ');
     return {
-      argPath: newPath.split(' ')[0],
-      argRest: newPath.split(' ').slice(1).join(' ').trim(),
+      argPath,
+      argRest: argRest.join(' ').trim(),
     };
   }
 }

@@ -10,21 +10,27 @@ export async function runCompress(options) {
     if (!args.argRest) {
       throw new Error();
     }
+
     const fromPath = makeAbsolutePath(args.argPath);
-    const ext = path.extname(fromPath);
-    const toFilePath = makeAbsolutePath(args.argRest) + ext + '.brotli';
+    let { base } = path.parse(fromPath);
+
+    const toFilePath = path.join(makeAbsolutePath(args.argRest), base + '.brotli');
     const toFolderPath = dirname(toFilePath);
+
     await access(fromPath);
     await access(toFolderPath);
+
     const readStream = createReadStream(fromPath);
-    const brotli = createBrotliCompress();
     const writeStream = createWriteStream(toFilePath);
+    const brotli = createBrotliCompress();
+
     const zipStream = readStream.pipe(brotli).pipe(writeStream);
     zipStream.on('finish', () => console.log('file successfully compressed'));
   } catch {
     console.error('operation failed');
   }
 }
+
 export async function runDecompress(options) {
   try {
     const args = parsePath(options);
@@ -32,15 +38,17 @@ export async function runDecompress(options) {
       throw new Error();
     }
     const fromPath = makeAbsolutePath(args.argPath);
-    const ext = path.basename(fromPath).split('.').at(-2);
-    const toFilePath = makeAbsolutePath(args.argRest) + '.' + ext;
+    let { base } = path.parse(fromPath);
+    const toFilePath = path.join(makeAbsolutePath(args.argRest), base.replace('.brotli', ''));
     const toFolderPath = dirname(toFilePath);
 
     await access(fromPath);
     await access(toFolderPath);
+
     const readStream = createReadStream(fromPath);
     const brotli = createBrotliDecompress();
     const writeStream = createWriteStream(toFilePath);
+
     const zipStream = readStream.pipe(brotli).pipe(writeStream);
     zipStream.on('finish', () => console.log('file successfully decompressed'));
   } catch {

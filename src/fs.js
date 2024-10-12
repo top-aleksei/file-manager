@@ -1,9 +1,13 @@
-import { access, rm, writeFile } from 'fs/promises';
-import { rename as fsRename } from 'fs/promises';
-
+import { access, rm, writeFile, rename as fsRename } from 'node:fs/promises';
 import { makeAbsolutePath, parsePath } from './utils/changePath.js';
-import { createReadStream, createWriteStream } from 'fs';
+import { createReadStream, createWriteStream } from 'node:fs';
 import * as path from 'path';
+
+const readFile = async (absPath) =>
+  new Promise((resolve, reject) => {
+    const readStream = createReadStream(absPath, { encoding: 'utf-8' });
+    readStream.on('data', console.log).on('end', resolve).on('error', console.error);
+  });
 
 export async function runCat(catPath) {
   let absPath;
@@ -12,7 +16,7 @@ export async function runCat(catPath) {
     absPath = makeAbsolutePath(parsedPath.argPath);
     await access(absPath);
 
-    read(absPath);
+    await readFile(absPath);
   } catch {
     console.error(`"${absPath}" doesn't exist or you have no access`);
   }
@@ -22,8 +26,13 @@ export async function runAdd(fileName) {
   if (!fileName) {
     throw new Error('Specify filename');
   }
-  const absPath = path.join(process.cwd(), fileName);
-  await writeFile(absPath, '', { flag: 'wx+' });
+
+  try {
+    const absPath = path.join(process.cwd(), fileName);
+    await writeFile(absPath, '', { flag: 'wx+' });
+  } catch {
+    console.error('Operation failed');
+  }
 }
 
 export async function runRename(options) {
@@ -53,8 +62,10 @@ export async function runCopy(options) {
     const fromPath = makeAbsolutePath(args.argPath);
     const restArgs = parsePath(args.argRest);
     const toPath = path.join(makeAbsolutePath(restArgs.argPath), path.basename(fromPath));
+
     await access(fromPath);
     await access(makeAbsolutePath(restArgs.argPath));
+
     const readStream = createReadStream(fromPath);
     const writeStream = createWriteStream(toPath);
     readStream.pipe(writeStream);
@@ -70,8 +81,10 @@ export async function runMove(options) {
     const fromPath = makeAbsolutePath(args.argPath);
     const restArgs = parsePath(args.argRest);
     const toPath = path.join(makeAbsolutePath(restArgs.argPath), path.basename(fromPath));
+
     await access(fromPath);
     await access(restArgs.argPath);
+
     const readStream = createReadStream(fromPath);
     const writeStream = createWriteStream(toPath);
     writeStream.on('close', async () => await rm(fromPath));
@@ -93,9 +106,4 @@ export async function runDelete(options) {
   } catch {
     console.error('operation failed');
   }
-}
-
-async function read(absPath) {
-  const readStream = createReadStream(absPath, { encoding: 'utf-8' });
-  readStream.on('data', console.log).on('error', console.error);
 }

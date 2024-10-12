@@ -5,11 +5,13 @@ import { runHash } from './hash.js';
 import { lsModule } from './ls.js';
 import { osModule } from './os.js';
 import { changePath } from './utils/changePath.js';
+import { userNameArgv } from './constants.js';
 
 export async function runCommand({ command, options }) {
   try {
     switch (command) {
       case '.exit':
+        console.log(`Thank you for using File Manager, ${userNameArgv}, goodbye!`);
         process.exit();
       case 'os':
         osModule(options);
@@ -18,13 +20,13 @@ export async function runCommand({ command, options }) {
         changePath('..');
         break;
       case 'cd':
-        cdModule(options);
+        await cdModule(options);
         break;
       case 'ls':
-        lsModule();
+        await lsModule();
         break;
       case 'cat':
-        runCat(options);
+        await runCat(options);
         break;
       case 'add':
         await runAdd(options);

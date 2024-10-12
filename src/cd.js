@@ -6,6 +6,7 @@ export async function cdModule(options) {
     console.error('Invalid path in arguments');
     return;
   }
+
   let absolutePath;
   try {
     const newPath = parsePath(options);
